@@ -105,7 +105,9 @@ StateControl.arrangeState =  function(unit, state, increaseType) {
 						if(upFlag)
 							StateControl.arrangeState(unit, checkTurnState, IncreaseType.DECREASE);
 						else{
-							turnState = editor.addTurnStateData(list, checkTurnState);
+							root.log("flag_down")
+							currentTurnState = this.getTurnState(unit, checkTurnState);
+							currentTurnState.setTurn(checkTurnState.getTurn());
 							flag = true;
 							break;
 						}
