@@ -26,6 +26,17 @@ Note: lower status will always +1 your chain. For example, let's say you have a 
 poison > toxic > envenomated, if you are afflicted with toxic , then both poison and toxic will
 upgrade your status to envenomated
 
+This version allows for Persona-style stat increase/decrease.
+For example, if you Atk + 2 then receive a Lower Atk debuff your Atk will be + 1
+
+Just make sure all the states are with the same ID, then all negative states will have negative chain number, positive
+ones have positive chain numbers
+Example
+
+			-2					-1		 			0					+1					+2
+		  Atk greatly		Atk reduced			Unchanged			Atk increased		Atk greatly
+		  reduced																		increased
+
 
 */
 
@@ -57,21 +68,26 @@ StateControl.arrangeState =  function(unit, state, increaseType) {
 							checkID = checkState.custom.id;
 							checkChain = checkState.custom.chain;
 							root.log(checkState.getName());
-							if(checkID != null && checkID == ID && checkChain != null && checkChain == i+1){
-								root.log("Success")
-								turnState = editor.addTurnStateData(list, checkState);
-								break;
+							if(i>0){
+								if(checkID != null && checkID == ID && checkChain != null && checkChain == i+1){
+									root.log("Success")
+									turnState = editor.addTurnStateData(list, checkState);
+									break;
+								}
+							}
+							if(i<0){
+								if(checkID != null && checkID == ID && checkChain != null && checkChain == i-1){
+									root.log("Success")
+									turnState = editor.addTurnStateData(list, checkState);
+									break;
+								}
 							}
 						}
 					StateControl.arrangeState(unit, state, IncreaseType.DECREASE);
 					}
 
 				else {
-
-						turnState.setTurn(state.getTurn());
-					
-
-					
+						turnState.setTurn(state.getTurn());			
 				}
 			}
 			else {
@@ -85,39 +101,72 @@ StateControl.arrangeState =  function(unit, state, increaseType) {
 						checkTurnState = list.getData(i).getState();
 						if (checkTurnState.custom.id == ID) {
 
-							var stateList = root.getBaseData().getStateList();
-							var stateCount = stateList.getCount();
+							if(checkTurnState.custom.chain + state.custom.chain == 0){
+								StateControl.arrangeState(unit, checkTurnState, IncreaseType.DECREASE);
+								flag = true;
+							}
 
-							for(m = 0; m < stateCount; m++){
-								checkState = stateList.getDataFromID(m);
-								checkID = checkState.custom.id;
-								checkChain = checkState.custom.chain;
-								root.log(checkState.getName());
-								if(checkID != null && checkID == ID && checkChain != null && checkChain == checkTurnState.custom.chain+1){
-									root.log("Success")
-									turnState = editor.addTurnStateData(list, checkState);
+							else if (state.custom.chain > 0){
+
+
+								var stateList = root.getBaseData().getStateList();
+								var stateCount = stateList.getCount();
+
+								for(m = 0; m < stateCount; m++){
+									checkState = stateList.getDataFromID(m);
+									checkID = checkState.custom.id;
+									checkChain = checkState.custom.chain;
+									if(checkID != null && checkID == ID && checkChain != null && checkChain == checkTurnState.custom.chain+1){
+										turnState = editor.addTurnStateData(list, checkState);
+										flag = true;
+										upFlag = true;
+										break;
+									}
+								}
+
+								if(upFlag)
+									StateControl.arrangeState(unit, checkTurnState, IncreaseType.DECREASE);
+								else {
+									currentTurnState = this.getTurnState(unit, checkTurnState);
+									currentTurnState.setTurn(checkTurnState.getTurn());
 									flag = true;
-									upFlag = true;
+									break;
+								}
+
+							}
+
+							else if (state.custom.chain < 0){
+
+
+								var stateList = root.getBaseData().getStateList();
+								var stateCount = stateList.getCount();
+
+								for(m = 0; m < stateCount; m++){
+									checkState = stateList.getDataFromID(m);
+									checkID = checkState.custom.id;
+									checkChain = checkState.custom.chain;
+									if(checkID != null && checkID == ID && checkChain != null && checkChain == checkTurnState.custom.chain-1){
+										turnState = editor.addTurnStateData(list, checkState);
+										flag = true;
+										upFlag = true;
+										break;
+									}
+								}
+
+
+
+
+								if(upFlag)
+									StateControl.arrangeState(unit, checkTurnState, IncreaseType.DECREASE);
+								else {
+									currentTurnState = this.getTurnState(unit, checkTurnState);
+									currentTurnState.setTurn(checkTurnState.getTurn());
+									flag = true;
 									break;
 								}
 							}
-
-						if(upFlag)
-							StateControl.arrangeState(unit, checkTurnState, IncreaseType.DECREASE);
-						else{
-							root.log("flag_down")
-							currentTurnState = this.getTurnState(unit, checkTurnState);
-							currentTurnState.setTurn(checkTurnState.getTurn());
-							flag = true;
-							break;
-						}
-
-						
 						}
 					}
-
-
-
 					if(!flag)
 						turnState = editor.addTurnStateData(list, state);
 				}
