@@ -25,7 +25,7 @@ AttackFlow._doAttackAction = function() {
 		
 
 		DamageControl.reduceHp(active, order.getActiveDamage());
-		DamageControl.reduceHp(passive, order.getPassiveDamage());
+		
 
 		var tetrakarn = false;
 		var makarakarn = false;
@@ -62,6 +62,9 @@ AttackFlow._doAttackAction = function() {
 				StateControl.arrangeState(passive, makaState, IncreaseType.DECREASE);
 			}
 		}
+			
+		if(!tetrakarn && !makarakarn)
+				DamageControl.reduceHp(passive, order.getPassiveDamage());
 		
 		DamageControl.checkHp(active, passive);
 		DamageControl.checkHp(passive, active);
@@ -140,12 +143,14 @@ RealBattle.doHitAction = function() {
 		
 		if (isHit) {
 			// Reduce HP at the side of being attacked, and damage can be displayed as UI.
-			this._checkDamage(order.getActiveUnit(), damagePassive, battlerPassive);
+			
 
 			if (reflected)
 			{
 				this._checkDamage(order.getActiveUnit(), damagePassive, battlerActive);
 			}
+			else
+				this._checkDamage(order.getActiveUnit(), damagePassive, battlerPassive);
 			// Reduce HP at the attacker and damage can be displayed as UI.
 			// Normally, no damage or recovery occurs for the attacker,
 			// so if statement is not executed in a principle.
@@ -217,12 +222,14 @@ EasyMapUnit._doHitAction = function() {
 		
 		if (isHit) {
 			// Reduce HP at the side of being attacked, and damage can be displayed as UI.
-			this._checkDamage(order.getActiveUnit(), damagePassive);
-
+			
 			if (reflected)
 			{
-				this._checkDamage(order.getActiveUnit(), damageActive);
+				this._checkDamage(order.getPassiveUnit(), damagePassive);
 			}
+			else
+				this._checkDamage(order.getActiveUnit(), damagePassive);
+
 			// Reduce HP at the attacker and damage can be displayed as UI.
 			// Normally, no damage or recovery occurs for the attacker,
 			// so if statement is not executed in a principle.
