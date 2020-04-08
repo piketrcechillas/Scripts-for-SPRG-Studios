@@ -34,6 +34,18 @@ ListCommandScrollbar.drawScrollContentMenuBot = function(x, y, object, isSelect,
 	}
 
 
+ListCommandScrollbar.drawScrollContentMenuAll = function(x, y, object, isSelect, index) {
+		var textui = this.getParentInstance().getCommandTextUI();
+		var color = textui.getColor();
+		var font = textui.getFont();
+
+		//Change the number in getDataFromId() with your All Part ID
+		var picbot = root.getBaseData().getUIResourceList(UIType.TITLE, false).getDataFromId(1);
+		
+		TextRenderer.drawFixedTitleText(x, y - 10, object.getCommandName(), color, font, TextFormat.CENTER, picbot, this._getPartsCount());
+	}
+
+
 BaseListCommandManager._drawTitle = function() {
 		var x = this.getPositionX();
 		var y = this.getPositionY();
@@ -67,14 +79,18 @@ ListCommandScrollbar.drawScrollbarMenu = function(xStart, yStart) {
 				
 				isSelect = index === this.getIndex();
 
-				if(index == 0)
-					this.drawScrollContentMenuTop(x, y, this._objectArray[index], isSelect, index);
-				else if(index == this._rowCount - 1)
-					this.drawScrollContentMenuBot(x, y, this._objectArray[index], isSelect, index);
-				else
-					this.drawScrollContentMenu(x, y, this._objectArray[index], isSelect, index);
+				if(this._rowCount == 1)
+					this.drawScrollContentMenuAll(x, y, this._objectArray[index], isSelect, index);
+				else {
+					if(index == 0)
+						this.drawScrollContentMenuTop(x, y, this._objectArray[index], isSelect, index);
+					else if(index == this._rowCount - 1)
+						this.drawScrollContentMenuBot(x, y, this._objectArray[index], isSelect, index);
+					else
+						this.drawScrollContentMenu(x, y, this._objectArray[index], isSelect, index);
+				}
 				if (isSelect && this._isActive) {
-					this.drawCursor(x + 40, y, true);
+						this.drawCursor(x + 40, y, true);
 				}
 				
 				if (index === this._forceSelectIndex) {
