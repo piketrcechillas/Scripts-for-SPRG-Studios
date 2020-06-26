@@ -53,7 +53,10 @@ UnitWaitFlowEntry._completeMemberData = function(playerTurn) {
 			return EnterResult.NOTENTER;
 		}
 
+	
+
 		SpeedGovernor.increaseCT();
+		SpeedGovernor.resetTempCT();
 		
 		return this._capsuleEvent.enterCapsuleEvent(event, true);
 	}
@@ -66,6 +69,8 @@ UnitWaitFlowEntry._completeMemberData = function(playerTurn) {
 		if (isWaitOnly) {
 			unit.custom.ct -= 60;
 
+			SpeedGovernor.increaseCT();
+
 			SpeedGovernor.setState(unitTurn, IncreaseType.DECREASE);
 
 			return this._buildEmptyAction();
@@ -75,6 +80,8 @@ UnitWaitFlowEntry._completeMemberData = function(playerTurn) {
 			combination = CombinationManager.getWaitCombination(unit);
 			if (combination === null) {
 				unit.custom.ct -= 60;
+
+				SpeedGovernor.increaseCT();
 
 				SpeedGovernor.setState(unitTurn, IncreaseType.DECREASE);
 
@@ -99,17 +106,19 @@ TurnChangeMapStart.doLastAction = function() {
 		var green = root.getMetaSession().global.greenID;
 
 		SpeedGovernor._setID(stateID, red, blue, green);
-
-
+		SpeedGovernor.resetTempCT();
+		
 
 		root.log("checkpoint 1")
-
+		SpeedGovernor._buildList();
 		unitTurn = SpeedGovernor._checkNextTurn();
 		while (unitTurn == null){
 			SpeedGovernor.increaseCT();
 			unitTurn = SpeedGovernor._checkNextTurn();
 		}
 		root.log("checkpoint 2")
+
+		
 
 		SpeedGovernor.setState(unitTurn, IncreaseType.INCREASE);
 
@@ -125,13 +134,16 @@ TurnChangeMapStart.doLastAction = function() {
 
 
 		SpeedGovernor.setWaitAll(nextTurnType, unitTurn)
-		root.getCurrentSession().setTurnType(nextTurnType);
+
 		root.getCurrentSession().setTurnCount(0);
+		root.getCurrentSession().setTurnType(nextTurnType);
+		
 	}
 
 
 
 TurnChangeEnd._startNextTurn = function() {
+		SpeedGovernor._removeTurn();
 		var nextTurnType;
 		var turnType = root.getCurrentSession().getTurnType();
 		var unitTurn;
@@ -168,6 +180,11 @@ SpeedGovernor = {
 	_animeIDRed: -1,
 	_animeIDBlue: -1,
 	_animeIDGreen: -1,
+	_turnList: ["", "", "", "", "", ""],
+	_turnListType: [0, 0 , 0, 0, 0 ,0],
+	_turnListId: [-1, -1, -1, -1, -1, -1],
+	_count: -1,
+	_totalAlive: -1,
 
 	_setID: function(stateID, animeIDRed, animeIDBlue, animeIDGreen) {
 		if(stateID != null)
@@ -178,6 +195,80 @@ SpeedGovernor = {
 			this._animeIDBlue = animeIDBlue;
 		if(animeIDGreen != null)
 			this._animeIDGreen = animeIDGreen;
+	},
+
+
+	_buildList: function() {
+
+		while(this._count < 5) {
+			var unit = this._checkNextTurnTmp();
+			while(unit == null){
+				this.increaseTempCT();
+				unit = this._checkNextTurnTmp();
+			}
+			unit.custom.tmp -= 80;
+			this._count++;
+			root.log("This is da Name:" + unit.getName())
+			this._turnListId[this._count] = unit.getId();
+			this._turnList[this._count] = unit.getName();
+			if(unit.getUnitType() == UnitType.PLAYER)
+				this._turnListType[this._count] = 0;
+			else if(unit.getUnitType() == UnitType.ENEMY)
+				this._turnListType[this._count] = 1;
+			else if(unit.getUnitType() == UnitType.ALLY)
+				this._turnListType[this._count] = 2;
+		}
+		this.resetTempCT();
+	},
+
+	_removeTurn: function() {
+		this.resetTempCT();
+		this._count = -1;
+		this._buildList();
+	},
+
+	_checkNextTurnTmp: function() {
+	var list = EnemyList.getAliveList();
+	var count = list.getCount();
+
+	var unitTurn = null;
+	for(i = 0; i < count; i++){
+		unit = list.getData(i);
+		if(unit.custom.tmp >= 100 && !unit.custom.mark){
+			unitTurn = unit;
+			unitTurn.setWait(false);
+			root.log("It's...." + unitTurn.getName() + "Temp")
+			return unitTurn;
+		}
+	}
+
+	var list2 = PlayerList.getSortieList();
+	var count2 = list2.getCount();
+
+	for(i = 0; i < count2; i++){
+		unit = list2.getData(i);
+		if(unit.custom.tmp >= 100 && !unit.custom.mark){
+			unitTurn = unit;
+			unitTurn.setWait(false);
+			root.log("It's...." + unitTurn.getName() + "Temp")
+			return unitTurn;
+			}
+		}
+
+	var list3 = AllyList.getAliveList();
+	var count3 = list3.getCount();
+
+	for(i = 0; i < count3; i++){
+		unit = list3.getData(i);
+		if(unit.custom.tmp >= 100 && !unit.custom.mark){
+			unitTurn = unit;
+			unitTurn.setWait(false);
+			root.log("It's...." + unitTurn.getName() + " Temp")
+			return unitTurn;
+			}
+		}
+
+	return unitTurn;
 	},
 
 	_checkNextTurn: function() {
@@ -222,6 +313,68 @@ SpeedGovernor = {
 		}
 
 	return unitTurn;
+	},
+
+	increaseTempCT: function() {
+		root.log("-----------------------")
+		var list = EnemyList.getAliveList();
+		var count = list.getCount();
+		for(i = 0; i < count; i++){
+			unit = list.getData(i);
+			unit.custom.tmp += unit.custom.spd;
+		}
+
+		var list2 = PlayerList.getSortieList();
+		var count2 = list2.getCount();
+
+		for(i = 0; i < count2; i++){
+			unit = list2.getData(i);
+			unit.custom.tmp += unit.custom.spd;
+		}
+
+		var list3 = AllyList.getAliveList();
+		var count3 = list3.getCount();
+
+		for(i = 0; i < count3; i++){
+			unit = list3.getData(i);
+			unit.custom.tmp += unit.custom.spd;
+		}
+
+
+		root.log("-----------------------")
+	},
+
+	resetTempCT: function() {
+		root.log("-----------------------")
+		var list = EnemyList.getAliveList();
+		var count = list.getCount();
+		for(i = 0; i < count; i++){
+			unit = list.getData(i);
+			unit.custom.tmp = unit.custom.ct;
+			unit.custom.mark = false;
+			root.log("Unit Temp CT: " + unit.custom.tmp)
+		}
+
+		var list2 = PlayerList.getSortieList();
+		var count2 = list2.getCount();
+
+		for(i = 0; i < count2; i++){
+			unit = list2.getData(i);
+			unit.custom.tmp = unit.custom.ct;
+			unit.custom.mark = false;
+		}
+
+		var list3 = AllyList.getAliveList();
+		var count3 = list3.getCount();
+
+		for(i = 0; i < count3; i++){
+			unit = list3.getData(i);
+			unit.custom.tmp = unit.custom.ct;
+			unit.custom.mark = false;
+		}
+
+
+		root.log("-----------------------")
 	},
 
 	increaseCT: function() {
@@ -358,7 +511,35 @@ SpeedGovernor = {
 
 		}
 
+	},
+
+	getUpcomingTurn: function() {
+		var arr = [];
+		for(i = 0; i < this._turnList.length; i++) {
+			arr.push(this._turnList[i]);
+		}
+
+		return arr;
+	},
+
+	getUpcomingTurnType: function() {
+		var arr = [];
+		for(i = 0; i < this._turnListType.length; i++) {
+			arr.push(this._turnListType[i]);
+		}
+
+		return arr;
+	},
+
+	getUpcomingTurnId: function() {
+		var arr = [];
+		for(i = 0; i < this._turnListId.length; i++) {
+			arr.push(this._turnListId[i]);
+		}
+
+		return arr;
 	}
+
 }
 
 ContentRenderer.drawUnitCtZoneEx = function(x, y, unit, pic, mhp) {
@@ -418,5 +599,9 @@ UnitMenuTopWindow.drawWindowContent = function(x, y) {
 
 
 TurnMarkFlowEntry.drawFlowEntry = function() {
+
+}
+
+MapParts.Terrain.drawMapParts = function() {
 
 }
