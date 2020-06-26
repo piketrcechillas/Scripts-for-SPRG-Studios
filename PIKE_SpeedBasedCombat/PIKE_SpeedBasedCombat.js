@@ -41,6 +41,8 @@ UnitWaitFlowEntry._completeMemberData = function(playerTurn) {
 		}
 
 		SpeedGovernor.increaseCT();
+		var list = root.getBaseData().getSkillList();
+		var reco = list.getDataFromId(27);
 		return this._capsuleEvent.enterCapsuleEvent(event, true);
 	}
 
@@ -110,6 +112,9 @@ TurnChangeEnd._startNextTurn = function() {
 		if(unitTurn.getUnitType() == UnitType.PLAYER){
 			nextTurnType = TurnType.PLAYER;
 		}
+		else if (unitTurn.getUnitType() == UnitType.ALLY){
+			nextTurnType = TurnType.ALLY;
+		}
 		else {
 			nextTurnType = TurnType.ENEMY;
 		}
@@ -149,6 +154,19 @@ SpeedGovernor = {
 			}
 		}
 
+	var list3 = AllyList.getAliveList();
+	var count3 = list3.getCount();
+
+	for(i = 0; i < count3; i++){
+		unit = list3.getData(i);
+		if(unit.custom.ct >= 100){
+			unitTurn = unit;
+			unitTurn.setWait(false);
+			root.log("It's...." + unitTurn.getName())
+			return unitTurn;
+			}
+		}
+
 	return unitTurn;
 	},
 
@@ -170,6 +188,17 @@ SpeedGovernor = {
 			unit.custom.ct += unit.custom.spd;
 			root.log(unit.getName() + ":" + unit.custom.ct);
 		}
+
+		var list3 = AllyList.getAliveList();
+		var count3 = list3.getCount();
+
+		for(i = 0; i < count3; i++){
+			unit = list3.getData(i);
+			unit.custom.ct += unit.custom.spd;
+			root.log(unit.getName() + ":" + unit.custom.ct);
+		}
+
+
 		root.log("-----------------------")
 	},
 
@@ -189,8 +218,14 @@ SpeedGovernor = {
 				unit = list.getData(i);
 				unit.setWait(false);
 			}
+			var list = AllyList.getAliveList();
+			var count = list.getCount();
+			for(i = 0; i < count; i++){
+				unit = list.getData(i);
+				unit.setWait(false);
+			}
 		}
-		else {
+		else if(turnType == TurnType.PLAYER) {
 			var list = PlayerList.getAliveList();
 			var count = list.getCount();
 			for(i = 0; i < count; i++){
@@ -205,7 +240,37 @@ SpeedGovernor = {
 			for(i = 0; i < count; i++){
 				unit = list.getData(i);
 				unit.setWait(false);
-	
+			}
+
+			var list = AllyList.getAliveList();
+			var count = list.getCount();
+			for(i = 0; i < count; i++){
+				unit = list.getData(i);
+				unit.setWait(false);
+			}
+		}
+		else if(turnType == TurnType.ALLY) {
+			var list = AllyList.getAliveList();
+			var count = list.getCount();
+			for(i = 0; i < count; i++){
+				unit = list.getData(i);
+				if(unit.getId() != unitTurn.getId()) {
+					unit.setWait(true);
+				}
+			}
+
+			var list = EnemyList.getAliveList();
+			var count = list.getCount();
+			for(i = 0; i < count; i++){
+				unit = list.getData(i);
+				unit.setWait(false);
+			}
+
+			var list = PlayerList.getAliveList();
+			var count = list.getCount();
+			for(i = 0; i < count; i++){
+				unit = list.getData(i);
+				unit.setWait(false);
 			}
 		}
 	}
@@ -265,3 +330,4 @@ UnitMenuTopWindow.drawWindowContent = function(x, y) {
 		this._drawFusionIcon(x, y);
 		this._drawUnitCt(x, y);
 	}
+
