@@ -1754,3 +1754,17 @@ MapCommand.configureCommands = function(groupArray) {
 
 	mixer.mixCommand(CommandLayoutType.MAPCOMMAND, groupArray, BaseListCommand);
 }
+
+UnitCommand.Shop.isCommandDisplayable = function() { 
+		var terrain = PosChecker.getTerrainFromPos(x, y);
+		if(terrain != null){
+			if(terrain.custom.barrack){
+				return false;
+			}
+		}
+
+
+		var event = this._getEvent();
+		
+		return event !== null && event.isEvent() && Miscellaneous.isItemAccess(this.getCommandTarget());
+	}
