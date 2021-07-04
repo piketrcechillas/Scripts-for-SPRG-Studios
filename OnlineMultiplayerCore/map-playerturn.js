@@ -161,6 +161,8 @@ var PlayerTurn = defineObject(BaseTurn,
 			root.getLoadSaveManager().loadInterruptionFile();
 			root.getMetaSession().getVariableTable(4).setVariable(0, 1);
 			root.log("Player Side: " + root.getMetaSession().getVariableTable(4).getVariable(0));
+			
+			//MapLayer.loadHp();
 			root.getCurrentSession().setTurnType(TurnType.PLAYER)
 			TurnControl.turnEnd();
 
@@ -230,6 +232,7 @@ var PlayerTurn = defineObject(BaseTurn,
 	},
 	
 	_prepareTurnMemberData: function() {
+
 		this._targetUnit = null;
 		this._xCursorSave = 0;
 		this._yCursorSave = 0;
@@ -248,6 +251,7 @@ var PlayerTurn = defineObject(BaseTurn,
 		}
 		
 		this._setDefaultActiveUnit();
+
 	},
 	
 	_completeTurnMemberData: function() {
@@ -342,11 +346,13 @@ var PlayerTurn = defineObject(BaseTurn,
 	
 	_moveUnitCommand: function() {
 		var result = this._mapSequenceCommand.moveSequence();
+
 		
 		if (result === MapSequenceCommandResult.COMPLETE) {
 			this._mapSequenceCommand.resetCommandManager();
 			MapLayer.getMarkingPanel().updateMarkingPanelFromUnit(this._targetUnit);
 			this._changeEventMode();
+		
 		}
 		else if (result === MapSequenceCommandResult.CANCEL) {
 			this._mapSequenceCommand.resetCommandManager();
@@ -492,14 +498,14 @@ var PlayerTurn = defineObject(BaseTurn,
 	_doEventEndAction: function() {
 		// isGameOver was called with this method because need to display a map when the lost at the battle once.
 		// Other than this, also having an intention not to display the terrain window.
-		if (GameOverChecker.isGameOver()) {
-			GameOverChecker.startGameOver();
-		}
-		else {
+		//if (GameOverChecker.isGameOver()) {
+			//GameOverChecker.startGameOver();
+		//}
+		//else {
 			// Countermeasure so as to restart at the script error.
 			// If it's called in func, restart when the turn starts, so it looks like restart.
-			RetryControl.register();
-		}
+		//	RetryControl.register();
+		//}
 	}
 }
 );

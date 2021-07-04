@@ -73,9 +73,8 @@ BaseTurnLogoFlowEntry._isTurnGraphicsDisplayable = function() {
 			count = AllyList.getAliveList().getCount();
 		}
 		
-		return count > 0;
+		return true;
 	}
-
 
 
 TurnChangeEnd._startNextTurn = function() {
@@ -100,15 +99,31 @@ TurnChangeEnd._startNextTurn = function() {
 	else {
 		if (turnType === TurnType.PLAYER) {
 			nextTurnType = TurnType.PLAYER2;
-		}
+
+			}
 		else if (turnType === TurnType.PLAYER2) {
-			nextTurnType = TurnType.PLAYER;
+
+
+			
 		}
 	}
-	
+
+	//Download();
+	//root.getLoadSaveManager().loadInterruptionFile();
 	root.log(nextTurnType);
 	root.getCurrentSession().setTurnType(nextTurnType);
+	
 }
+
+TurnChangeMapStart.doLastAction = function() {
+		var turnType = TurnType.PLAYER;
+		
+		root.getCurrentSession().setTurnCount(0);
+		root.getCurrentSession().setTurnType(turnType);		
+	}
+	
+
+
 
 FilterControl.getListArray = function(filter) {
     var listArray = [];
@@ -281,7 +296,6 @@ FactionControl = {
 
 }
 
-
 var StatusChecker = defineObject(BaseObject, {
 	_http: null,
 
@@ -322,10 +336,9 @@ var StatusChecker = defineObject(BaseObject, {
 
 MapCommand.TurnEnd.openCommand = function() {
 
-
+		//MapLayer.saveHp();
 		root.getLoadSaveManager().saveInterruptionFile(SceneType.FREE, root.getCurrentSession().getCurrentMapInfo().getId(), LoadSaveScreen._getCustomObject());
 		if(root.getCurrentSession().getCurrentMapInfo().custom.online){
-			root.resetConsole();
 			Upload();
 			root.log("Uploaded")}
 
@@ -342,3 +355,26 @@ function wait(ms)
 	do { d2 = new Date(); }
 	while(d2-d < ms);
 }
+
+TitleCommand.LocalGame = defineObject(BaseTitleCommand,
+{
+	openCommand: function() {
+	},
+	
+	moveCommand: function() {
+		// endGame can be called with openCommand, but it sounds as if the sound effect is interrupted.
+		root.endGame();
+		return MoveResult.END;
+	},
+	
+	isSelectable: function() {
+		return true;
+	},
+
+	getCommandName: function() {
+		return 'Play Local Game';
+	}
+
+}
+);
+

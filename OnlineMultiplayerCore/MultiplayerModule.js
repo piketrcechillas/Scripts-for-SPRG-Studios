@@ -156,12 +156,11 @@ var MultiplayerCreationFlowEntry = defineObject(BaseFlowEntry,
 	moveFlowEntry: function() {
 		var input = this._scrollbar.moveInput();
 		
-		
-		if (input === ScrollbarInput.SELECT) {
+			while(this._activate == "N"){
 
 			var id = root.getMetaSession().global.multiplayerID;
 			var http = new ActiveXObject("Msxml2.XMLHTTP.6.0")
-			http.open('GET', "https://srpgstudioserver.azurewebsites.net/rest/connect/checkPlayerJoined?id=" + id, false);
+			http.open('POST', "https://srpgstudioserver.azurewebsites.net/rest/connect/checkPlayerJoined?id=" + id, false);
 			http.send('');
 
 
@@ -179,8 +178,9 @@ var MultiplayerCreationFlowEntry = defineObject(BaseFlowEntry,
 				root.getMetaSession().getVariableTable(4).setVariable(0, 0);	
 				root.log("Current Player ID: " + root.getMetaSession().getVariableTable(4).getVariable(0))	
 				return MoveResult.END;
-				
 				}
+
+			wait(100);
 
 
 				return MoveResult.CONTINUE;
@@ -288,7 +288,7 @@ var MultiplayerCreationFlowEntry = defineObject(BaseFlowEntry,
 			this._difficultyArray.push(difficulty);
 		}
 
-		this._roomNo.push("Check Other Player");
+		this._roomNo.push("Waiting for other player...");
 
 
 	},
@@ -303,7 +303,7 @@ var MultiplayerCreationFlowEntry = defineObject(BaseFlowEntry,
 		
 		this._scrollbar.setScrollFormation(1, 1);
 		this._scrollbar.setObjectArray(this._roomNo);
-		this._scrollbar.setActive(true);
+		this._scrollbar.setActive(false);
 	},
 	
 	_checkIndexAndText: function() {

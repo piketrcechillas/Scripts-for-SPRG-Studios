@@ -161,7 +161,12 @@ var PlayerTurn2 = defineObject(BaseTurn,
 			root.getLoadSaveManager().loadInterruptionFile();
 			root.getMetaSession().getVariableTable(4).setVariable(0, 0);
 			root.log("Player Side: " + root.getMetaSession().getVariableTable(4).getVariable(0));
+
+
+			//MapLayer.loadHp();
 			root.getCurrentSession().setTurnType(TurnType.PLAYER2)
+
+
 			TurnControl.turnEnd();
 
 		return MoveResult.CONTINUE;
@@ -342,19 +347,21 @@ var PlayerTurn2 = defineObject(BaseTurn,
 	},
 	
 	_moveUnitCommand: function() {
-		var result = this._mapSequenceCommand.moveSequence();
-		
-		if (result === MapSequenceCommandResult2.COMPLETE) {
-			this._mapSequenceCommand.resetCommandManager();
-			MapLayer.getMarkingPanel().updateMarkingPanelFromUnit(this._targetUnit);
-			this._changeEventMode();
-		}
-		else if (result === MapSequenceCommandResult2.CANCEL) {
-			this._mapSequenceCommand.resetCommandManager();
-			this.changeCycleMode(PlayerTurn2Mode.MAP);
-		}
-		
-		return MoveResult.CONTINUE;
+				var result = this._mapSequenceCommand.moveSequence();
+
+			
+			if (result === MapSequenceCommandResult2.COMPLETE) {
+				this._mapSequenceCommand.resetCommandManager();
+				MapLayer.getMarkingPanel().updateMarkingPanelFromUnit(this._targetUnit);
+				this._changeEventMode();
+
+			}
+			else if (result === MapSequenceCommandResult2.CANCEL) {
+				this._mapSequenceCommand.resetCommandManager();
+				this.changeCycleMode(PlayerTurn2Mode.MAP);
+			}
+			
+			return MoveResult.CONTINUE;
 	},
 	
 	_drawAutoCursor: function() {
@@ -493,14 +500,14 @@ var PlayerTurn2 = defineObject(BaseTurn,
 	_doEventEndAction: function() {
 		// isGameOver was called with this method because need to display a map when the lost at the battle once.
 		// Other than this, also having an intention not to display the terrain window.
-		if (GameOverChecker.isGameOver()) {
-			GameOverChecker.startGameOver();
-		}
-		else {
+		//if (GameOverChecker.isGameOver()) {
+			//GameOverChecker.startGameOver();
+	//	}
+		//else {
 			// Countermeasure so as to restart at the script error.
 			// If it's called in func, restart when the turn starts, so it looks like restart.
-			RetryControl.register();
-		}
+			//RetryControl.register();
+		//}
 	}
 }
 );
