@@ -114,7 +114,7 @@ MapLayer.drawUnitLayer = function() {
 			}
 
 			if(count == 999) {
-				count = offset;
+				SoundGenerator.count = offset;
 			}
 
 			SoundGenerator.play(file, handle);
@@ -125,17 +125,21 @@ MapLayer.drawUnitLayer = function() {
 
 
 var SoundGenerator = {	
+	count :0,
 	play: function(file, handle) {
-		root.log(count)
-		if(count == offset) {
-			root.getMaterialManager().voicePlay(DataConfig.getVoiceCategoryName(), file, 1);
+		root.log("Count:"+this.count)
+		if(this.count == offset) {
+			root.getMaterialManager().voicePlay(DataConfig.getVoiceCategoryName(), file, 0);
 			MediaControl.musicPlayNew(handle);
-			count=999;
+			this.count=999;
 		}
-		else if(count == 999){
+		else if(this.count == 999){
+			this.count = 0;
+			root.getMaterialManager().voicePlay(DataConfig.getVoiceCategoryName(), file, 0);
+			MediaControl.musicPlayNew(handle);
 		}
 		else{
-			count++;
+			this.count++;
 		}
 
 	}
