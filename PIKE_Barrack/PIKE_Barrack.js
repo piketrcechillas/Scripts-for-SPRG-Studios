@@ -473,25 +473,17 @@ var DeployLayoutScreen = defineObject(BaseScreen,
 		var cutIndex;
 		var price = this._itemSale.startSale(isBuy, isForceStock, this._activeItemWindow.getShopSelectItem());
 		
-		if (isBuy) {
-			cutIndex = this._getCutIndex(this._activeItemWindow.getShopSelectItem());
-			if (cutIndex !== -1) {
-				this._cutArrayData(cutIndex);
-				this._buyItemWindow.updateItemArea();
-			}
-		}
-
 		var turnType = root.getCurrentSession().getTurnType();
 
 
 		var TargetList = root.getBaseData().getPlayerList();
 		var i, targetUnit;
 		for (i = 0; i < TargetList.getCount(); i++){
-			if (TargetList.getData(i).getId() === this._activeItemWindow.getShopSelectItem().custom.id){
+			if (TargetList.getData(i).getId() === this._activeItemWindow.getShopSelectItem().custom.id ){
 				targetUnit = TargetList.getData(i);
 			}
+
 		}
-	
 
 		var session = root.getCurrentSession();
 		var x = session.getMapCursorX();
@@ -514,6 +506,14 @@ var DeployLayoutScreen = defineObject(BaseScreen,
 		this._sellItemWindow.updateItemArea();
 		
 		this._playSaleSound();
+
+		if (isBuy) {
+			cutIndex = this._getCutIndex(this._activeItemWindow.getShopSelectItem());
+			if (cutIndex !== -1) {
+				this._cutArrayData(cutIndex);
+				this._buyItemWindow.updateItemArea();
+			}
+		}
 
 	},
 	
@@ -793,9 +793,10 @@ var DeployShopCurrencyWindow = defineObject(BaseWindow,
 		var text = this.getCurrencySign();
 
 		var gold = root.getMetaSession().getGold();
+
 		if(price > gold) {
 			root.log("Through this")
-			root.getGraphicsManager().drawText(x, y +  y + ContentLayout.KEYWORD_HEIGHT, text, length, color, 100, font);
+			//root.getGraphicsManager().drawText(x, y +  y + ContentLayout.KEYWORD_HEIGHT, text, length, color, 100, font);
 		}
 		else {
 			TextRenderer.drawKeywordText(x, y, text, -1, color, font);
